@@ -16,6 +16,7 @@ on:
     branches:
       - main
       - master
+      - free-threading
     tags:
       - '*'
   pull_request:
