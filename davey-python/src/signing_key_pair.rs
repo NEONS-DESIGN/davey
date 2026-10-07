@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 
-#[pyclass(get_all)]
+#[pyclass(frozen, get_all)]
 #[derive(Clone)]
 pub struct SigningKeyPair {
   pub private: Vec<u8>,
@@ -14,13 +14,13 @@ impl SigningKeyPair {
     Self { private, public }
   }
 
-  fn __repr__(&self) -> &'static str {
-    let public_key = &self.public;
-    let hex = public_key
+  fn __repr__(&self) -> String {
+    let hex = self
+      .public
       .iter()
       .map(|b| format!("{:02x}", b))
       .collect::<String>();
-    Box::leak(format!("<SigningKeyPair public={}>", hex).into_boxed_str())
+    format!("<SigningKeyPair public={}>", hex)
   }
 }
 
@@ -34,7 +34,7 @@ impl From<davey::SigningKeyPair> for SigningKeyPair {
 }
 
 #[pyfunction]
-pub fn generate_p256_keypair() -> PyResult<SigningKeyPair> {
-  let signing_key_pair = davey::SigningKeyPair::generate();
+pub fn generate_p256_keypair(py: Python<'_>) -> PyResult<SigningKeyPair> {
+  let signing_key_pair = py.allow_threads(davey::SigningKeyPair::generate);
   Ok(SigningKeyPair::from(signing_key_pair))
 }

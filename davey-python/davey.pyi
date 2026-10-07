@@ -153,6 +153,10 @@ class DaveSession:
     """
     A DAVE session.
 
+    A session can be shared between threads, including on free-threaded Python builds.
+    Calls on the same session are serialized, so e.g. encrypting on an audio thread while
+    processing commits on another thread is safe.
+
     :param protocol_version: The protocol version to use.
     :param user_id: The user ID of the session.
     :param channel_id: The channel ID of the session.

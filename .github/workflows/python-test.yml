@@ -114,6 +114,16 @@ jobs:
           uv sync --no-install-package davey -v
           uv pip install --no-index --find-links dist --force-reinstall davey -v --prerelease=allow
           python -m pytest
+      - name: pytest (free-threaded)
+        if: ${{ startsWith(matrix.platform.arch, 'x86_64') }}
+        shell: bash
+        run: |
+          set -e
+          uv venv --clear --python 3.14t
+          source .venv/bin/activate
+          uv sync --no-install-package davey -v
+          uv pip install --no-index --find-links dist --force-reinstall davey -v --prerelease=allow
+          python -m pytest
       - name: pytest
         if: ${{ !startsWith(matrix.platform.arch, 'x86') && matrix.platform.arch != 'ppc64' }}
         uses: uraimo/run-on-arch-action@v3
@@ -238,7 +248,9 @@ jobs:
       - uses: astral-sh/setup-uv@v10.2.0
       - uses: actions/setup-python@v7
         with:
-          python-version: 3.x
+          python-version: |
+            3.14t
+            3.x
           architecture: ${{ matrix.platform.target }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -261,6 +273,15 @@ jobs:
           uv sync --no-install-package davey -v
           uv pip install --no-index --find-links dist --force-reinstall davey -v --prerelease=allow
           python -m pytest
+      - name: pytest (free-threaded)
+        shell: bash
+        run: |
+          set -e
+          uv venv --clear --python 3.14t
+          source .venv/Scripts/activate
+          uv sync --no-install-package davey -v
+          uv pip install --no-index --find-links dist --force-reinstall davey -v --prerelease=allow
+          python -m pytest
 
   macos:
     needs: code_checks
@@ -278,6 +299,7 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: |
+            3.14t
             3.9
             3.10
             3.11
@@ -300,6 +322,15 @@ jobs:
         run: |
           set -e
           uv venv
+          source .venv/bin/activate
+          uv sync --no-install-package davey -v
+          uv pip install --no-index --find-links dist --force-reinstall davey -v --prerelease=allow
+          python -m pytest
+      - name: pytest (free-threaded)
+        shell: bash
+        run: |
+          set -e
+          uv venv --clear --python 3.14t
           source .venv/bin/activate
           uv sync --no-install-package davey -v
           uv pip install --no-index --find-links dist --force-reinstall davey -v --prerelease=allow

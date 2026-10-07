@@ -8,18 +8,21 @@ pub fn generate_key_fingerprint(version: u16, key: &[u8], user_id: u64) -> PyRes
 
 #[pyfunction]
 pub fn generate_pairwise_fingerprint(
+  py: Python<'_>,
   version: u16,
   local_key: &[u8],
   local_user_id: u64,
   remote_key: &[u8],
   remote_user_id: u64,
 ) -> PyResult<Vec<u8>> {
-  davey::generate_pairwise_fingerprint(
-    version,
-    local_key,
-    local_user_id,
-    remote_key,
-    remote_user_id,
-  )
+  py.allow_threads(|| {
+    davey::generate_pairwise_fingerprint(
+      version,
+      local_key,
+      local_user_id,
+      remote_key,
+      remote_user_id,
+    )
+  })
   .map_err(|e| py_value_error!("failed to generate pairwise fingerprint: {:?}", e))
 }
