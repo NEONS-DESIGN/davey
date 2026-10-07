@@ -35,16 +35,18 @@ impl From<davey::CommitWelcome> for CommitWelcome {
 
 // The session is shared between threads (e.g. an audio sender and an event loop), so every
 // call takes the lock instead of relying on PyO3's per-object borrow flag.
+// The core session stays boxed: it contains over-aligned fields, and Python only guarantees
+// 8-byte alignment for object storage on 32-bit platforms.
 #[pyclass(frozen)]
 pub struct DaveSession {
-  inner: Mutex<davey::DaveSession>,
+  inner: Mutex<Box<davey::DaveSession>>,
 }
 
 impl DaveSession {
   /// Locks the session while staying attached to the interpreter.
   /// For short operations; waiting for the lock still detaches, so it cannot deadlock with
   /// the GIL or a stop-the-world pause.
-  fn lock(&self, py: Python<'_>) -> MutexGuard<'_, davey::DaveSession> {
+  fn lock(&self, py: Python<'_>) -> MutexGuard<'_, Box<davey::DaveSession>> {
     // A panic in the core is raised as PanicException and poisons the lock. Keep the session
     // usable afterwards so it can still be reset or re-initialized.
     self
@@ -113,7 +115,7 @@ impl DaveSession {
       .map_err(|e| py_value_error!("Failed to initialize session: {:?}", e))?;
 
     Ok(Self {
-      inner: Mutex::new(session),
+      inner: Mutex::new(Box::new(session)),
     })
   }
 
