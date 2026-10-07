@@ -244,9 +244,7 @@ jobs:
       - uses: astral-sh/setup-uv@v10.2.0
       - uses: actions/setup-python@v7
         with:
-          python-version: |
-            3.14t
-            3.x
+          python-version: 3.x
           architecture: ${{ matrix.platform.target }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -254,6 +252,20 @@ jobs:
           working-directory: davey-python
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
+          sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      # Installed separately and passed explicitly: with 3.14t on PATH, --find-interpreter
+      # can skip the regular 3.14 and build only the free-threaded wheel.
+      - uses: actions/setup-python@v7
+        id: python-ft
+        with:
+          python-version: 3.14t
+          architecture: ${{ matrix.platform.target }}
+      - name: Build free-threaded wheel
+        uses: PyO3/maturin-action@v1
+        with:
+          working-directory: davey-python
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist --interpreter ${{ steps.python-ft.outputs.python-path }}
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
       - name: Upload wheels
         uses: actions/upload-artifact@v7
