@@ -82,11 +82,6 @@ jobs:
             arch: ppc64le
             manylinux: auto
             distro: ubuntu24.04
-          - runner: ubuntu-24.04-riscv
-            target: riscv64gc-unknown-linux-gnu
-            arch: riscv64
-            manylinux: 2_39
-            distro: ubuntu24.04
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10.2.0
